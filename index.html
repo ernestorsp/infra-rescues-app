@@ -2,91 +2,37 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>INFRA</title>
+  <title>INFRA – Rescues</title>
+
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
+  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1557ff">
 
+  <!-- iOS -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="INFRA">
+  <meta name="apple-mobile-web-app-title" content="INFRA Rescues">
   <link rel="apple-touch-icon" href="icon-512.png">
 
   <style>
-    html,body{margin:0;padding:0;width:100%;height:100%;background:#000;overflow:hidden}
-    iframe{border:0;width:100%;height:100%;display:block;background:#000}
+    html, body { margin:0; padding:0; width:100%; height:100%; background:#000; }
+    iframe { border:none; width:100%; height:100%; }
   </style>
 </head>
 <body>
 
-  <iframe
-    id="appFrame"
-    allow="camera; microphone; fullscreen"
-    referrerpolicy="no-referrer-when-downgrade"
-  ></iframe>
+<iframe
+  src="https://script.google.com/macros/s/AKfycbxrDURsSr02L85rT2Xj-zaUwisLAtnOZ2hPjrG_IIA4QFLDJypoAwDw597SvLZqK_g/exec?app=rescue"
+  allow="camera; microphone; fullscreen">
+</iframe>
 
-  <script>
-    const GAS_BASE = "https://script.google.com/macros/s/AKfycbyu4qmUIIylpBGYWsd94k6By9ZhPLFIpAWFUYOo1vgq3oKI1XPanbObpOUQsq-EOCA/exec";
-    const frame = document.getElementById("appFrame");
-
-    function normalizeApp(v){
-      const a = String(v || "").toLowerCase();
-      if (a === "capture") return "capture";
-      if (a === "rescue") return "rescue";
-      return "coach";
-    }
-
-    function getAppParam(){
-      const p = new URLSearchParams(location.search);
-      return normalizeApp(p.get("app") || "coach");
-    }
-
-    function setIframe(app){
-      const a = normalizeApp(app);
-      const nextUrl = (a === "capture") ? GAS_BASE : (GAS_BASE + "?app=" + encodeURIComponent(a));
-      if (frame.src !== nextUrl) frame.src = nextUrl;
-    }
-
-    // ✅ Asegura que la URL tenga app (para back button bonito)
-    (function ensureUrlHasApp(){
-      const url = new URL(location.href);
-      if (!url.searchParams.get("app")) {
-        url.searchParams.set("app", "coach");
-        history.replaceState({}, "", url);
-      }
-    })();
-
-    // ✅ load initial
-    setIframe(getAppParam());
-
-    // ✅ internal nav requested by GAS (dropdown menu -> postMessage)
-    window.addEventListener("message", (event) => {
-      const data = event && event.data ? event.data : null;
-      if (!data || data.type !== "AAXPRESS_NAV") return;
-
-      const next = normalizeApp(data.app);
-
-      // update URL (back button)
-      const url = new URL(location.href);
-      url.searchParams.set("app", next);
-      history.pushState({}, "", url);
-
-      setIframe(next);
-
-      // (opcional) confirmación al iframe
-      try{
-        frame.contentWindow && frame.contentWindow.postMessage({ type:"AAXPRESS_NAV_OK", app: next }, "*");
-      }catch(e){}
-    });
-
-    // ✅ support back button in PWA
-    window.addEventListener("popstate", () => setIframe(getAppParam()));
-
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("sw.js");
-    }
-  </script>
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js");
+  }
+</script>
 
 </body>
 </html>
